@@ -1,0 +1,27 @@
+# Ignore build outputs
+bin/
+obj/
+out/
+
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+
+
+# Ignore database and local storage files
+*.mdf
+*.ldf
+*.sdf
+*.db
+
+# Ignore publish outputs
+publish/
+*.publishsettings
+
+
+# Visual Studio files
+.vs/
+.vscode/
+*.code-workspace
+
