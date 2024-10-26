@@ -48,5 +48,26 @@ namespace Synchronizer
 
             CustomerDataGrid.ItemsSource = displayData;
         }
+
+        private void Search_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_customers == null || !_customers.Any())
+            {
+                // No data fetched yet, so do nothing to display 
+                return;
+            }
+
+            string searchText = Search.Text.ToLower();
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                // If the search box is empty, display the full list
+                DisplayData(_customers);
+            }
+            else
+            {
+                var filteredCustomers = _customers.Where(c => c.Name.ToLower().Contains(searchText)).ToList();
+                DisplayData(filteredCustomers);
+            }
+        }
     }
 }
