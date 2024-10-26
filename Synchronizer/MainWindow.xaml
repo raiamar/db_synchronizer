@@ -8,13 +8,13 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid AutomationProperties.Name="searchButton">
         <Label Content="Time Interval:" HorizontalAlignment="Left" Height="31" Margin="10,37,0,0" VerticalAlignment="Top" Width="90"/>
-        <TextBox HorizontalAlignment="Left" Height="31" Margin="105,37,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="79" AutomationProperties.Name="interval"/>
-        <Button Content="Set Time" HorizontalAlignment="Left" Height="31" Margin="189,37,0,0" VerticalAlignment="Top" Width="81" AutomationProperties.Name="setInterval" Click="Button_Click"/>
-        <Button Content="Fetch Data" HorizontalAlignment="Left" Height="31" Margin="308,37,0,0" VerticalAlignment="Top" Width="92" AutomationProperties.Name="fetchData"/>
-        <TextBox HorizontalAlignment="Left" Height="35" Margin="21,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="232" AutomationProperties.Name="search" TextChanged="TextBox_TextChanged"/>
+        <TextBox HorizontalAlignment="Left" Height="31" Margin="105,37,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="79" Name="Interval"/>
+        <Button Content="Set Time" HorizontalAlignment="Left" Height="31" Margin="189,37,0,0" VerticalAlignment="Top" Width="81" Name="SetInterval"/>
+        <Button Content="Fetch Data" HorizontalAlignment="Left" Height="31" Margin="386,123,0,0" VerticalAlignment="Top" Width="92" Name="FetchData" Click="FetchDataButton_Click"/>
+        <TextBox HorizontalAlignment="Left" Height="35" Margin="21,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="232" Name="search"/>
         <Button Content="Search" HorizontalAlignment="Left" Height="35" Margin="270,121,0,0" VerticalAlignment="Top" Width="84"/>
-        <DataGrid HorizontalAlignment="Left" Height="183" Margin="21,185,0,0" VerticalAlignment="Top" Width="504" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False" GridLinesVisibility="None" AutomationProperties.Name="dataGrid"/>
-        
+        <DataGrid HorizontalAlignment="Left" Height="183" Margin="21,185,0,0" VerticalAlignment="Top" Width="738" d:ItemsSource="{d:SampleData ItemCount=5}" GridLinesVisibility="None" Name="CustomerDataGrid"/>
+
 
     </Grid>
 </Window>

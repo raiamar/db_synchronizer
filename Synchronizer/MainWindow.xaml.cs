@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using Synchronizer.Helper;
+using Synchronizer.Model;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Synchronizer
@@ -8,6 +12,8 @@ namespace Synchronizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly MSSQLHelper _serverHelper;
+        private List<Customer> _customers;
         public MainWindow()
         {
             InitializeComponent();
@@ -17,16 +23,30 @@ namespace Synchronizer
 
             // Seed data into the database
             seeder.SeedData();
+
+            _serverHelper = new MSSQLHelper(connectionString);
+        }
+        private void FetchDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            _customers = _serverHelper.FetchCustomers();
+            DisplayData(_customers);
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+
+        private void DisplayData(List<Customer> customers)
         {
+            // Flatten customer data with associated locations for display
+            var displayData = customers
+                .SelectMany(c => c.Locations.DefaultIfEmpty(), (c, l) => new
+                {
+                    c.CustomerId,
+                    c.Name,
+                    c.Email,
+                    c.Phone,
+                    Address = l?.Address ?? "No Address"
+                }).ToList();
 
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
+            CustomerDataGrid.ItemsSource = displayData;
         }
     }
 }
