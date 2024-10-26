@@ -6,10 +6,10 @@ namespace Synchronizer.Helper
 {
     public class MSSQLHelper
     {
-        private readonly string connectionString;
+        private readonly string _connectionString;
         public MSSQLHelper(string connectionString)
         {
-            this.connectionString = connectionString;
+            _connectionString = connectionString;
         }
 
         // Fetch customer from MSSQL Server
@@ -17,7 +17,7 @@ namespace Synchronizer.Helper
         {
             var customers = new List<Customer>();
 
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
 
