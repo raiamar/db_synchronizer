@@ -47,10 +47,10 @@ namespace Synchronizer
         {
             _customers = _serverHelper.FetchCustomers();
 
-            //var sqliteHelper = new SQLiteHelper($"Data Source={_sqliteConnectionString}");
-            //await sqliteHelper.InsertOrUpdateCustomersAsync(_customers);
+            var sqliteHelper = new SQLiteHelper($"Data Source={_sqliteConnectionString}");
+            await sqliteHelper.InsertOrUpdateCustomersAsync(_customers);
 
-            //await sqliteHelper.LogSyncAsync("Synchronized data from MSSQL to SQLite at " + DateTime.Now.ToString("g"));
+            await sqliteHelper.LogSyncAsync("Synchronized data from MSSQL to SQLite at " + DateTime.Now.ToString("g"));
 
             DisplayData(_customers);
         }

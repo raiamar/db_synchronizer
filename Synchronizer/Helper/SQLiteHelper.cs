@@ -18,6 +18,8 @@ namespace Synchronizer.Helper
 
         public async Task InsertOrUpdateCustomersAsync(IEnumerable<Customer> customers)
         {
+            SQLitePCL.Batteries_V2.Init();
+
             using (var connection = new SqliteConnection(_sqliteConnectionString))
             {
                 await connection.OpenAsync();
