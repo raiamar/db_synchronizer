@@ -2,9 +2,6 @@
 using Synchronizer.Model;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
-using System.IO;
 using System.Windows;
 
 namespace Synchronizer.Helper
@@ -18,7 +15,7 @@ namespace Synchronizer.Helper
             _sqliteConnectionString = sqliteConnectionString;
         }
 
-        public async Task InsertOrUpdateCustomersAsync(IEnumerable<Customer> customers)
+        public void InsertOrUpdateCustomers(IEnumerable<Customer> customers)
         {
             const int maxRetryAttempts = 1; // retry attempts
             const int delayBetweenRetries = 2000; // Delay in milliseconds between retries
@@ -28,7 +25,7 @@ namespace Synchronizer.Helper
             {
                 using (var connection = new SqliteConnection(_sqliteConnectionString))
                 {
-                    await connection.OpenAsync();
+                    connection.Open();
 
                     using (var transaction = connection.BeginTransaction())
                     {
@@ -36,7 +33,7 @@ namespace Synchronizer.Helper
                         {
                             foreach (var customer in customers)
                             {
-                                await InsertOrUpdateCustomerAsync(connection, customer);
+                                InsertOrUpdateCustomer(connection, customer);
                             }
                             transaction.Commit();
                             break;
@@ -44,7 +41,7 @@ namespace Synchronizer.Helper
                         catch (Exception ex)
                         {
                             transaction.Rollback();
-                            await LogSyncAsync($"Attempt {attempt + 1} - Transaction rolled back due to error: {ex.Message} at {DateTime.Now:g}");
+                            LogSync($"Attempt {attempt + 1} - Transaction rolled back due to error: {ex.Message} at {DateTime.Now:g}");
 
                             if (attempt == maxRetryAttempts)
                             {
@@ -53,7 +50,7 @@ namespace Synchronizer.Helper
                             }
 
                             // Wait before retrying
-                            await Task.Delay(delayBetweenRetries);
+                            System.Threading.Thread.Sleep(delayBetweenRetries);
                         }
                     }
                 }
@@ -62,13 +59,13 @@ namespace Synchronizer.Helper
             }
         }
 
-        private async Task InsertOrUpdateCustomerAsync(SqliteConnection connection, Customer customer)
+        private void InsertOrUpdateCustomer(SqliteConnection connection, Customer customer)
         {
             var query = "SELECT COUNT(*) FROM Customer WHERE CustomerID = @CustomerID";
             using (var command = new SqliteCommand(query, connection))
             {
                 command.Parameters.AddWithValue("@CustomerID", customer.CustomerId);
-                int count = Convert.ToInt32(await command.ExecuteScalarAsync());
+                int count = Convert.ToInt32(command.ExecuteScalar());
 
                 if (count > 0)
                 {
@@ -79,7 +76,7 @@ namespace Synchronizer.Helper
                         updateCommand.Parameters.AddWithValue("@Name", customer.Name);
                         updateCommand.Parameters.AddWithValue("@Email", customer.Email);
                         updateCommand.Parameters.AddWithValue("@Phone", customer.Phone);
-                        await updateCommand.ExecuteNonQueryAsync();
+                        updateCommand.ExecuteNonQuery();
                     }
                 }
                 else
@@ -91,25 +88,25 @@ namespace Synchronizer.Helper
                         insertCommand.Parameters.AddWithValue("@Name", customer.Name);
                         insertCommand.Parameters.AddWithValue("@Email", customer.Email);
                         insertCommand.Parameters.AddWithValue("@Phone", customer.Phone);
-                        await insertCommand.ExecuteNonQueryAsync();
+                        insertCommand.ExecuteNonQuery();
                     }
                 }
             }
 
             foreach (var location in customer.Locations)
             {
-                await InsertOrUpdateLocationAsync(connection, customer.CustomerId, location);
+                InsertOrUpdateLocation(connection, customer.CustomerId, location);
             }
         }
 
-        private async Task InsertOrUpdateLocationAsync(SqliteConnection connection, int customerId, Location location)
+        private void InsertOrUpdateLocation(SqliteConnection connection, int customerId, Location location)
         {
             var query = "SELECT COUNT(*) FROM Location WHERE CustomerID = @CustomerID AND Address = @Address";
             using (var command = new SqliteCommand(query, connection))
             {
                 command.Parameters.AddWithValue("@CustomerID", customerId);
                 command.Parameters.AddWithValue("@Address", location.Address);
-                int count = Convert.ToInt32(await command.ExecuteScalarAsync());
+                int count = Convert.ToInt32(command.ExecuteScalar());
 
                 if (count > 0)
                 {
@@ -118,7 +115,7 @@ namespace Synchronizer.Helper
                     {
                         updateCommand.Parameters.AddWithValue("@CustomerID", customerId);
                         updateCommand.Parameters.AddWithValue("@Address", location.Address);
-                        await updateCommand.ExecuteNonQueryAsync();
+                        updateCommand.ExecuteNonQuery();
                     }
                 }
                 else
@@ -128,23 +125,24 @@ namespace Synchronizer.Helper
                     {
                         insertCommand.Parameters.AddWithValue("@CustomerID", customerId);
                         insertCommand.Parameters.AddWithValue("@Address", location.Address);
-                        await insertCommand.ExecuteNonQueryAsync();
+                        insertCommand.ExecuteNonQuery();
                     }
                 }
             }
         }
 
-        public async Task LogSyncAsync(string description)
+        public void LogSync(string description)
         {
             using (var connection = new SqliteConnection(_sqliteConnectionString))
             {
-                await connection.OpenAsync();
+                connection.Close();
+                connection.Open();
 
                 var query = "INSERT INTO SyncLog (Description) VALUES (@Description)";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Description", description);
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery ();
                 }
             }
         }

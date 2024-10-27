@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +21,6 @@ namespace Synchronizer
         private List<Customer> _customers;
         private string _sqliteConnectionString;
         private DispatcherTimer _timer;
-        private int _currentPage = 1;
-        private int _pageSize = 15;
         public MainWindow()
         {
             InitializeComponent();
@@ -47,17 +46,18 @@ namespace Synchronizer
             // set timer
             _timer = new DispatcherTimer();
             _timer.Tick += Timer_Tick;
+
         }
-        private async void FetchDataButton_Click(object sender, RoutedEventArgs e)
+        private void FetchDataButton_Click(object sender, RoutedEventArgs e)
         {
             _customers = _serverHelper.FetchCustomers();
 
             // sync data
             var sqliteHelper = new SQLiteHelper($"Data Source={_sqliteConnectionString}");
-            await sqliteHelper.InsertOrUpdateCustomersAsync(_customers);
+              //sqliteHelper.InsertOrUpdateCustomers(_customers);
 
             // sync log
-            await sqliteHelper.LogSyncAsync("Synchronized data from MSSQL to SQLite at " + DateTime.Now.ToString("g"));
+            //sqliteHelper.LogSync("Synchronized data from MSSQL to SQLite at " + DateTime.Now.ToString("g"));
 
             DisplayData(_customers);
         }
