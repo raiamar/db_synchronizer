@@ -2,6 +2,7 @@
 using Synchronizer.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,7 +33,11 @@ namespace Synchronizer
             string connectionString = "Server=DESKTOP-7IDTFU3\\SQLEXPRESS;Database=FleetPanda;Trusted_Connection=True;";
             DatabaseSeeder seeder = new DatabaseSeeder(connectionString);
 
-             _sqliteConnectionString = "C:\\Users\\Acer\\Desktop\\a\\FleetPanda.db;";
+
+            // sqllite path configuration
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string rootDirectory = Directory.GetParent(Directory.GetParent(Directory.GetParent(currentDirectory)?.FullName)?.FullName)?.FullName;
+            _sqliteConnectionString = Path.Combine(rootDirectory, "FleetPanda.db");
 
             // Seed data into the database
             seeder.SeedData();
@@ -47,9 +52,11 @@ namespace Synchronizer
         {
             _customers = _serverHelper.FetchCustomers();
 
+            // sync data
             var sqliteHelper = new SQLiteHelper($"Data Source={_sqliteConnectionString}");
             await sqliteHelper.InsertOrUpdateCustomersAsync(_customers);
 
+            // sync log
             await sqliteHelper.LogSyncAsync("Synchronized data from MSSQL to SQLite at " + DateTime.Now.ToString("g"));
 
             DisplayData(_customers);

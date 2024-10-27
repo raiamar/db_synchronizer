@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System.IO;
+using System.Windows;
 
 namespace Synchronizer.Helper
 {
@@ -18,20 +20,45 @@ namespace Synchronizer.Helper
 
         public async Task InsertOrUpdateCustomersAsync(IEnumerable<Customer> customers)
         {
-            SQLitePCL.Batteries_V2.Init();
+            const int maxRetryAttempts = 1; // retry attempts
+            const int delayBetweenRetries = 2000; // Delay in milliseconds between retries
+            int attempt = 0;
 
-            using (var connection = new SqliteConnection(_sqliteConnectionString))
+            while (attempt <= maxRetryAttempts)
             {
-                await connection.OpenAsync();
-
-                using (var transaction = connection.BeginTransaction())
+                using (var connection = new SqliteConnection(_sqliteConnectionString))
                 {
-                    foreach (var customer in customers)
+                    await connection.OpenAsync();
+
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        await InsertOrUpdateCustomerAsync(connection, customer);
+                        try
+                        {
+                            foreach (var customer in customers)
+                            {
+                                await InsertOrUpdateCustomerAsync(connection, customer);
+                            }
+                            transaction.Commit();
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                            await LogSyncAsync($"Attempt {attempt + 1} - Transaction rolled back due to error: {ex.Message} at {DateTime.Now:g}");
+
+                            if (attempt == maxRetryAttempts)
+                            {
+                                MessageBox.Show("Sync has failed.");
+                                throw;
+                            }
+
+                            // Wait before retrying
+                            await Task.Delay(delayBetweenRetries);
+                        }
                     }
-                    transaction.Commit();
                 }
+
+                attempt++;
             }
         }
 
