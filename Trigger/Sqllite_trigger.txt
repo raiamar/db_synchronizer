@@ -1,0 +1,38 @@
+CREATE TRIGGER UpdateCustomerLog
+AFTER UPDATE ON Customer
+FOR EACH ROW
+BEGIN
+    -- Insert change log for 'Name' only if it has changed
+    INSERT INTO ChangeLog (TableName, ColumnName, RecordID, OldValue, NewValue, Description, ChangeTime)
+    SELECT 'Customer', 'Name', OLD.CustomerID, OLD.Name, NEW.Name,
+           'CustomerID ' || OLD.CustomerID || ': Name changed from ''' || OLD.Name || ''' to ''' || NEW.Name || '''',
+           CURRENT_TIMESTAMP
+    WHERE OLD.Name <> NEW.Name;
+
+    -- Insert change log for 'Email' only if it has changed
+    INSERT INTO ChangeLog (TableName, ColumnName, RecordID, OldValue, NewValue, Description, ChangeTime)
+    SELECT 'Customer', 'Email', OLD.CustomerID, OLD.Email, NEW.Email,
+           'CustomerID ' || OLD.CustomerID || ': Email changed from ''' || OLD.Email || ''' to ''' || NEW.Email || '''',
+           CURRENT_TIMESTAMP
+    WHERE OLD.Email <> NEW.Email;
+
+    -- Insert change log for 'Phone' only if it has changed
+    INSERT INTO ChangeLog (TableName, ColumnName, RecordID, OldValue, NewValue, Description, ChangeTime)
+    SELECT 'Customer', 'Phone', OLD.CustomerID, OLD.Phone, NEW.Phone,
+           'CustomerID ' || OLD.CustomerID || ': Phone changed from ''' || OLD.Phone || ''' to ''' || NEW.Phone || '''',
+           CURRENT_TIMESTAMP
+    WHERE OLD.Phone <> NEW.Phone;
+END;
+
+-- Trigger to track updates in the Location table
+CREATE TRIGGER UpdateLocationLog
+AFTER UPDATE ON Location
+FOR EACH ROW
+BEGIN
+    -- Insert change log for 'Address' only if it has changed
+    INSERT INTO ChangeLog (TableName, ColumnName, RecordID, OldValue, NewValue, Description, ChangeTime)
+    SELECT 'Location', 'Address', OLD.LocationID, OLD.Address, NEW.Address,
+           'LocationID ' || OLD.LocationID || ': Address changed from ''' || OLD.Address || ''' to ''' || NEW.Address || '''',
+           CURRENT_TIMESTAMP
+    WHERE OLD.Address <> NEW.Address;
+END;
